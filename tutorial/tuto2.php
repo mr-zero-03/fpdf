@@ -6,8 +6,7 @@ class PDF extends FPDF
   // Page header
   function Header()
   {
-	  // Logo
-	  $this->Image('logo.png',10,6,30);
+      $this->SetY(10);
 	  // Arial bold 15
 	  $this->SetFont('Arial','B',15);
 	  // Move to the right
@@ -16,6 +15,16 @@ class PDF extends FPDF
 	  $this->Cell(30,10,'Title',1,0,'C');
 	  // Line break
 	  $this->Ln(20);
+	  $this->Cell(0, 0, null, 1);
+	  $this->Ln(5);
+
+      if($this->PageNo()==1) {
+	    // Logo Page 1
+	    $this->Image('pdf-logo.png',35,6,17,20, 'png');
+      } else {
+	    // Logo Other Pages
+        $this->Image('logo.png',35,6,17,20, 'png');	  
+      }
   }
 
   // Page footer
@@ -23,6 +32,8 @@ class PDF extends FPDF
   {
 	  // Position at 1.5 cm from bottom
 	  $this->SetY(-15);
+	  $this->Cell(0, 0, null, 1);
+	  $this->Ln();
 	  // Arial italic 8
 	  $this->SetFont('Arial','I',8);
 	  // Page number
@@ -35,7 +46,22 @@ $pdf = new PDF();
 $pdf->AliasNbPages();
 $pdf->AddPage();
 $pdf->SetFont('Times','',12);
-for($i=1;$i<=40;$i++)
+
+$pageMidX = $pdf->GetPageWidth() / 2;
+$pageMidY = $pdf->GetPageHeight() / 2;
+$pdf->Image('logo.png', $pageMidX, $pageMidY, 17, 20);
+
+$pagesAmount = '{nb}';
+$pdf->Cell(0, 10, 'Hola, cantidad de paginas: ' . $pagesAmount ,0 ,0 ,'C');
+$pdf->Ln(20);
+
+$pdf->Cell(0, 10, 'Page Width:' . $pdf->GetPageWidth(), 0, 0, 'C'); $pdf->Ln();
+$pdf->Cell(0, 10, 'PageHeigh:' . $pdf->GetPageHeight(), 0, 0, 'C'); $pdf->Ln();
+
+
+for($i=1;$i<=60;$i++){
 	$pdf->Cell(0,10,'Printing line number '.$i,0,1);
+}
+
 $pdf->Output();
 ?>
