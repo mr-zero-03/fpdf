@@ -49,11 +49,25 @@ function ChapterBody($chapterText) {
 	// Read text file
 	$txt = file_get_contents($chapterText);
 	
-	
-	// Times 12
-	$this->SetFont('Times','',12);
-	// Output justified text
-	$this->MultiCell(0, 5, $txt);
+	$bold = false;  // Parsing the text to use bold
+	if ( $txt[0] === '*' ) {
+	  $bold = true;
+	}
+	$txtArray = explode('*', $txt);
+
+  $countTxtArray = count( $txtArray );
+  for ( $i=0; $i < $countTxtArray; $i++ ) {
+   if ( $bold ) {
+      $this->SetFont('Times','B',12);
+      $this->Write( 5, $txtArray[$i] );
+      $bold = false;
+    } else {
+      $this->SetFont('Times','',12);
+   	  $this->Write( 5, $txtArray[$i] );
+      $bold = true;
+    }
+  }
+  
 	// Line break
 	$this->Ln();
 	// Mention in italics
