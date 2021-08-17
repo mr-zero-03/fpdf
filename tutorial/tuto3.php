@@ -1,31 +1,29 @@
 <?php
 require('../fpdf.php');
 
-class PDF extends FPDF
-{
-function Header()
-{
+class PDF extends FPDF {
+
+function Header() {
 	global $title;
 
 	// Arial bold 15
-	$this->SetFont('Arial','B',15);
+	$this->SetFont('Arial','B',20);
 	// Calculate width of title and position
-	$w = $this->GetStringWidth($title)+6;
+	$w = $this->GetStringWidth($title)+5;
 	$this->SetX((210-$w)/2);
-	// Colors of frame, background and text
-	$this->SetDrawColor(0,80,180);
-	$this->SetFillColor(230,230,0);
-	$this->SetTextColor(220,50,50);
-	// Thickness of frame (1 mm)
-	$this->SetLineWidth(1);
+	// Colors of frame, background and text respectively
+	$this->SetDrawColor(155, 30, 4);
+	$this->SetFillColor(17 ,17, 17);
+	$this->SetTextColor(118, 0, 0);
+	// Thickness of frame (2 mm)
+	$this->SetLineWidth(2);
 	// Title
 	$this->Cell($w,9,$title,1,1,'C',true);
 	// Line break
 	$this->Ln(10);
 }
 
-function Footer()
-{
+function Footer() {
 	// Position at 1.5 cm from bottom
 	$this->SetY(-15);
 	// Arial italic 8
@@ -36,46 +34,53 @@ function Footer()
 	$this->Cell(0,10,'Page '.$this->PageNo(),0,0,'C');
 }
 
-function ChapterTitle($num, $label)
-{
+function ChapterTitle($chapterNum, $chapterTitle) {
 	// Arial 12
-	$this->SetFont('Arial','',12);
+	$this->SetFont('Arial','BI',12);
 	// Background color
-	$this->SetFillColor(200,220,255);
+	$this->SetFillColor(245, 51, 51);
 	// Title
-	$this->Cell(0,6,"Chapter $num : $label",0,1,'L',true);
+	$this->Cell(0, 6, "Chapter $chapterNum : $chapterTitle", 0, 1, 'L', true);
 	// Line break
 	$this->Ln(4);
 }
 
-function ChapterBody($file)
-{
+function ChapterBody($chapterText) {
 	// Read text file
-	$txt = file_get_contents($file);
+	$txt = file_get_contents($chapterText);
+	
+	
 	// Times 12
 	$this->SetFont('Times','',12);
 	// Output justified text
-	$this->MultiCell(0,5,$txt);
+	$this->MultiCell(0, 5, $txt);
 	// Line break
 	$this->Ln();
 	// Mention in italics
 	$this->SetFont('','I');
-	$this->Cell(0,5,'(end of excerpt)');
+	$this->Cell(0,10,'(end of excerpt)');
+
+	$y = $this->GetY();
+	$y += 10;
+	$this->Image('tuto3.jpg', 10, $y, 190, 0, 'jpg');
 }
 
-function PrintChapter($num, $title, $file)
-{
+function PrintChapter($chapterNum, $chapterTitle, $chapterText) {
 	$this->AddPage();
-	$this->ChapterTitle($num,$title);
-	$this->ChapterBody($file);
+	$this->ChapterTitle($chapterNum, $chapterTitle);
+	$this->ChapterBody($chapterText);
 }
 }
+
 
 $pdf = new PDF();
-$title = '20000 Leagues Under the Seas';
+
+$title = '1984';
 $pdf->SetTitle($title);
-$pdf->SetAuthor('Jules Verne');
-$pdf->PrintChapter(1,'A RUNAWAY REEF','20k_c1.txt');
-$pdf->PrintChapter(2,'THE PROS AND CONS','20k_c2.txt');
+$pdf->SetAuthor('George Orwell');
+
+$pdf->PrintChapter(1,'War is Peace, Freedom is Slavery, Ignorance is Strength','c1-1984.txt');
+$pdf->PrintChapter(2,'Thoughtcrime','c2-1984.txt');
+
 $pdf->Output();
 ?>
