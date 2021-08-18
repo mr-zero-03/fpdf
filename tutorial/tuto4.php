@@ -4,28 +4,25 @@ require('../fpdf.php');
 class PDF extends FPDF
 {
 protected $col = 0; // Current column
-protected $y0;      // Ordinate of column start
+protected $y0;   // Ordinate of column start
 
-function Header()
-{
+function Header() {
 	// Page header
 	global $title;
 
 	$this->SetFont('Arial','B',15);
-	$w = $this->GetStringWidth($title)+6;
+	$w = $this->GetStringWidth($title)+50;
 	$this->SetX((210-$w)/2);
-	$this->SetDrawColor(0,80,180);
-	$this->SetFillColor(230,230,0);
-	$this->SetTextColor(220,50,50);
+	$this->SetDrawColor(155, 30, 4);
+	$this->SetFillColor(17, 17, 17);
+	$this->SetTextColor(118, 0, 0);
 	$this->SetLineWidth(1);
 	$this->Cell($w,9,$title,1,1,'C',true);
 	$this->Ln(10);
-	// Save ordinate
 	$this->y0 = $this->GetY();
 }
 
-function Footer()
-{
+function Footer() {
 	// Page footer
 	$this->SetY(-15);
 	$this->SetFont('Arial','I',8);
@@ -33,29 +30,24 @@ function Footer()
 	$this->Cell(0,10,'Page '.$this->PageNo(),0,0,'C');
 }
 
-function SetCol($col)
-{
+function SetCol($col) {
 	// Set position at a given column
 	$this->col = $col;
-	$x = 10+$col*65;
+	$x = 10+$col*40;
 	$this->SetLeftMargin($x);
 	$this->SetX($x);
 }
 
-function AcceptPageBreak()
-{
+function AcceptPageBreak() {
 	// Method accepting or not automatic page break
-	if($this->col<2)
-	{
+	if($this->col<4) {
 		// Go to next column
 		$this->SetCol($this->col+1);
 		// Set ordinate to top
-		$this->SetY($this->y0);
+		$this->SetY($this->y0); //39
 		// Keep on page
 		return false;
-	}
-	else
-	{
+	}	else {
 		// Go back to first column
 		$this->SetCol(0);
 		// Page break
@@ -63,25 +55,26 @@ function AcceptPageBreak()
 	}
 }
 
-function ChapterTitle($num, $label)
-{
+function ChapterTitle($chapterNum, $chapterTitle) {
+	// Arial 12
+	$this->SetFont('Arial','BI',12);
+	// Background color
+	$this->SetFillColor(245, 51, 51);
 	// Title
-	$this->SetFont('Arial','',12);
-	$this->SetFillColor(200,220,255);
-	$this->Cell(0,6,"Chapter $num : $label",0,1,'L',true);
+	$this->Cell(0, 6, "Chapter $chapterNum : $chapterTitle", 0, 1, 'L', true);
+	// Line break
 	$this->Ln(4);
-	// Save ordinate
+	//Save the point where have to start the chapter text
 	$this->y0 = $this->GetY();
 }
 
-function ChapterBody($file)
-{
+function ChapterBody($chapterText) {
 	// Read text file
-	$txt = file_get_contents($file);
+	$txt = file_get_contents($chapterText);
 	// Font
 	$this->SetFont('Times','',12);
-	// Output text in a 6 cm width column
-	$this->MultiCell(60,5,$txt);
+	// Output text in a 3 cm width column
+  $this->MultiCell(30,5, $txt);
 	$this->Ln();
 	// Mention
 	$this->SetFont('','I');
@@ -90,20 +83,21 @@ function ChapterBody($file)
 	$this->SetCol(0);
 }
 
-function PrintChapter($num, $title, $file)
-{
-	// Add chapter
+function PrintChapter($chapterNum, $chapterTitle, $chapterText) {
 	$this->AddPage();
-	$this->ChapterTitle($num,$title);
-	$this->ChapterBody($file);
+	$this->ChapterTitle($chapterNum, $chapterTitle);
+	$this->ChapterBody($chapterText);
 }
 }
 
 $pdf = new PDF();
-$title = '20000 Leagues Under the Seas';
+
+$title = '1984';
 $pdf->SetTitle($title);
-$pdf->SetAuthor('Jules Verne');
-$pdf->PrintChapter(1,'A RUNAWAY REEF','20k_c1.txt');
-$pdf->PrintChapter(2,'THE PROS AND CONS','20k_c2.txt');
+$pdf->SetAuthor('George Orwell');
+
+$pdf->PrintChapter(1,'War is Peace, Freedom is Slavery, Ignorance is Strength','c1-1984.txt');
+$pdf->PrintChapter(2,'Thoughtcrime','c2-1984.txt');
+
 $pdf->Output();
 ?>
