@@ -1,31 +1,31 @@
 <?php
 require('../fpdf.php');
 
-class PDF extends FPDF
-{
+class PDF extends FPDF {
+
 // Load data
-function LoadData($file)
-{
+function LoadData($file) {
 	// Read file lines
 	$lines = file($file);
 	$data = array();
-	foreach($lines as $line)
+	foreach($lines as $line) {
 		$data[] = explode(';',trim($line));
+	}
 	return $data;
 }
 
 // Simple table
-function BasicTable($header, $data)
-{
+function BasicTable($header, $data) {
 	// Header
-	foreach($header as $col)
+	foreach($header as $col) {
 		$this->Cell(40,7,$col,1);
+	}
 	$this->Ln();
 	// Data
-	foreach($data as $row)
-	{
-		foreach($row as $col)
+	foreach($data as $row) {
+		foreach($row as $col) {
 			$this->Cell(40,6,$col,1);
+		}
 		$this->Ln();
 	}
 }
@@ -34,18 +34,18 @@ function BasicTable($header, $data)
 function ImprovedTable($header, $data)
 {
 	// Column widths
-	$w = array(40, 35, 40, 45);
+	$w = array(40, 35, 40);
 	// Header
-	for($i=0;$i<count($header);$i++)
+	$headerCount = count($header);
+	for( $i=0; $i < $headerCount; $i++ ) {
 		$this->Cell($w[$i],7,$header[$i],1,0,'C');
+	}
 	$this->Ln();
 	// Data
-	foreach($data as $row)
-	{
-		$this->Cell($w[0],6,$row[0],'LR');
-		$this->Cell($w[1],6,$row[1],'LR');
-		$this->Cell($w[2],6,number_format($row[2]),'LR',0,'R');
-		$this->Cell($w[3],6,number_format($row[3]),'LR',0,'R');
+	foreach($data as $row) {
+		for ( $i=0; $i < $headerCount; $i++ ) {
+			$this->Cell($w[$i],6,$row[$i],'LR');
+		}
 		$this->Ln();
 	}
 	// Closing line
@@ -53,8 +53,7 @@ function ImprovedTable($header, $data)
 }
 
 // Colored table
-function FancyTable($header, $data)
-{
+function FancyTable($header, $data) {
 	// Colors, line width and bold font
 	$this->SetFillColor(255,0,0);
 	$this->SetTextColor(255);
@@ -62,9 +61,34 @@ function FancyTable($header, $data)
 	$this->SetLineWidth(.3);
 	$this->SetFont('','B');
 	// Header
-	$w = array(40, 35, 40, 45);
-	for($i=0;$i<count($header);$i++)
-		$this->Cell($w[$i],7,$header[$i],1,0,'C',true);
+	$width = array();
+	$colsCount = count($header);
+	$rowsCount = count($data);
+
+  $stringWidth = '';
+	for ( $i=0; $i < $colsCount; $i++ ) {  //To set the size of the columns depending on the strings width
+
+	  for ( $j=0; $j < $rowsCount; $j++ ) {
+	    $string = $data[$j][$i];
+	    $stringWidth = $this->GetStringWidth( $string );
+      
+      if ( !isset($width[$i]) || $stringWidth > $width[$i] ) {
+  	    $width[$i] = $stringWidth;
+
+        $headerStringWidth = $this->GetStringWidth( $header[$i] );
+  	    if ( $headerStringWidth > $stringWidth ) {
+  	      $width[$i] = $headerStringWidth;
+  	    }
+
+	    }
+	    
+	  }
+
+	}
+  
+	for( $i=0;$i < $colsCount; $i++ ){
+		$this->Cell($width[$i],7,$header[$i],1,0,'C',true);
+	}
 	$this->Ln();
 	// Color and font restoration
 	$this->SetFillColor(224,235,255);
@@ -72,31 +96,30 @@ function FancyTable($header, $data)
 	$this->SetFont('');
 	// Data
 	$fill = false;
-	foreach($data as $row)
-	{
-		$this->Cell($w[0],6,$row[0],'LR',0,'L',$fill);
-		$this->Cell($w[1],6,$row[1],'LR',0,'L',$fill);
-		$this->Cell($w[2],6,number_format($row[2]),'LR',0,'R',$fill);
-		$this->Cell($w[3],6,number_format($row[3]),'LR',0,'R',$fill);
+
+	foreach($data as $row) {
+		for ( $i=0; $i < 	$colsCount; $i++ ) {
+			$this->Cell($width[$i],6,$row[$i],'LR',0,'L',$fill);
+		}
 		$this->Ln();
 		$fill = !$fill;
 	}
 	// Closing line
-	$this->Cell(array_sum($w),0,'','T');
+	$this->Cell(array_sum($width),0,'','T');
 }
 }
 
 $pdf = new PDF();
 // Column headings
-$header = array('Country', 'Capital', 'Area (sq km)', 'Pop. (thousands)');
+$header = array('Name', 'Country', 'Age');
 // Data loading
-$data = $pdf->LoadData('countries.txt');
+$data = $pdf->LoadData('people.txt');
 $pdf->SetFont('Arial','',14);
 $pdf->AddPage();
 $pdf->BasicTable($header,$data);
-$pdf->AddPage();
+$pdf->Ln(20);
 $pdf->ImprovedTable($header,$data);
-$pdf->AddPage();
+$pdf->Ln(20);
 $pdf->FancyTable($header,$data);
 $pdf->Output();
 ?>

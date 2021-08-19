@@ -1,0 +1,6 @@
+Maria Anders;Austria;20
+Francisco Chang;Belgium;30
+Roland Mendel;Denmark;75
+Helen Bennett;Colombia;11
+Yoshi Tannamuri;France;19
+Giovanni Rovelli;Germany;24
