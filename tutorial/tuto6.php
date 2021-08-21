@@ -1,8 +1,7 @@
 <?php
 require('../fpdf.php');
 
-class PDF extends FPDF
-{
+class PDF extends FPDF {
 protected $B = 0;
 protected $I = 0;
 protected $U = 0;
@@ -104,7 +103,7 @@ $pdf->Write(5,'here',$link);
 $pdf->SetFont('');
 // Second page
 $pdf->AddPage();
-$pdf->SetLink($link);
+$pdf->SetLink($link, 50, 1);
 $pdf->Image('logo.png',10,12,30,0,'','http://www.fpdf.org');
 $pdf->SetLeftMargin(45);
 $pdf->SetFontSize(14);
