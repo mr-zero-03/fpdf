@@ -14,8 +14,19 @@ class PDF extends FPDF {
   *    printCell method:
   * Receives all the Cell parameters and make an utf8_decode to the text.
   * http://www.fpdf.org/en/doc/cell.htm
+  * Additional parameters are:
+  *  $lnBefore = Receives a number (int or float) to specify the size of the line break before the text to print (if you send true the value equals the height of the last printed cell)
+  *  font parameters = Family, Style and Size
   */
-  function printCell( $width = 0, $height = 0, $text = '', $border = 0, $ln = 0, $align = 'L', $fill = false, $link = null ) {
+  function printCell( $width = 0, $height	= 0, $text = '', $border = 0, $ln = 0, $align = 'L', $fill = false, $link = null, $lnBefore = null, $fontFamily = null, $fontStyle = null, $fontSize = null ) {
+
+    $this->SetFont( $fontFamily, $fontStyle, $fontSize );
+
+    if ( is_numeric( $lnBefore ) || $lnBefore === true ) {
+      if ( $lnBefore === true ) { $lnBefore = null; }
+      $this->Ln( $lnBefore );
+    }
+
     $textUtf8Decoded = utf8_decode( $text );
     $this->Cell( $width, $height, $textUtf8Decoded, $border, $ln, $align, $fill, $link );
   }
@@ -24,7 +35,6 @@ class PDF extends FPDF {
   function ipsData( $ipsDataArray ) {
     $ipsDictionary = [ 'name' => '', 'nit' => 'Nit', 'city' => 'Ciudad', 'adress' => 'Dirección', 'phoneNumber' => 'Teléfono' ];
 
-    $this->Ln( 8 );
     $this->SetFont( 'Arial', '', 10 );
 
     $toPrint = '';
