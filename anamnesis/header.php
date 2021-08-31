@@ -4,6 +4,12 @@ include_once ('../fpdf.php');
 
 class PDF extends FPDF {
 
+  function hr( $ln = 10 ) {
+    $this->Ln( $ln );
+    $this->printCell( 0, 0, null, 'T' );
+	  $this->Ln();
+  }
+
   /**
   *    printCell method:
   * Receives all the Cell parameters and make an utf8_decode to the text.
@@ -35,9 +41,8 @@ class PDF extends FPDF {
     }
 
     $this->SetLeftMargin( 10 );
-    $this->Ln( 10 );
-    $this->printCell( 0, 0, null, 'T' );
-   
+    $this->hr();
+
   }
 
   function Header() {
