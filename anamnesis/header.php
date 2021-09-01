@@ -6,7 +6,7 @@ class PDF extends FPDF {
 
   function hr( $ln = 10 ) {
     $this->Ln( $ln );
-    $this->printCell( 0, 0, null, 'T' );
+    $this->Cell( 0, 0, null, 'T' );
 	  $this->Ln();
   }
 
@@ -48,19 +48,38 @@ class PDF extends FPDF {
   }
 
 
-  function ipsData( $ipsDataArray ) {
-    $ipsDictionary = [ 'name' => '', 'nit' => 'Nit', 'city' => 'Ciudad', 'adress' => 'Dirección', 'phoneNumber' => 'Teléfono' ];
+  function fillDictionaryArray( $array, $type ) {
+    $dictionary = array();
+    $dictionary[ 'cell' ] = array ( 'name' => '', 'lnBefore' => null, 'fontFamily' => null, 'fontStyle' => null, 'fontSize' => null, 'width' => null, 'height' => null, 'border' => null, 'ln' => null, 'align' => 'L', 'fill' => null, 'link' => null );
 
+    foreach ( $dictionary[ $type ] as $key => $value ) {
+      if ( !isset( $array[ $key ] ) ) {
+        $array[ $key ] = null;
+      }
+    }
+
+    return ( $array );
+
+  }
+
+  function printHeader( $dataArray, $dictionary ) {
     $toPrint = '';
 
-    $ipsDictionarySize = count( $ipsDictionary );
+    foreach ( $dictionary as $key => $value ) {
+      if ( $value[ 'type' ] !== 'image' ) {
 
-    foreach ( $ipsDictionary as $key => $value ) {
-      if ( trim ( $value ) !== '' ) {
-        $toPrint = $value . ': ';
+        $value = $this->fillDictionaryArray( $value, 'cell' );
+
+        if ( trim ( $value[ 'name' ] ) !== '' ) {
+          $toPrint = $value[ 'name' ] . ': ';
+        }
+
+        $this->printCell( 0, 5, $toPrint . $dataArray[ $key ], $value[ 'border' ], $value[ 'ln' ], $value[ 'align' ], $value[ 'fill' ], $value[ 'link' ], $value[ 'lnBefore' ], $value[ 'fontFamily' ], $value[ 'fontStyle' ], $value[ 'fontSize' ] );
+
+      } else {
+        $this->Image( $dataArray[ 'logo' ], $value[ 'x' ], $value[ 'y' ], $value[ 'width' ], $value[ 'height' ] );
+        $this->SetLeftMargin( 65 );
       }
-
-      $this->printCell( 0, 5, $toPrint . $ipsDataArray[ $key ], null, 1 );
 
     }
 
@@ -71,7 +90,15 @@ class PDF extends FPDF {
 
   function Header() {
     $ipsDataArray = yaml_parse_file ( 'ips_data.yaml' );
-    $this->ipsData( $ipsDataArray );
+    $ipsDictionary = [
+      'logo' => array ( 'type' => 'image', 'fileName' => 'logo.png', 'x' => 10, 'y' => 10, 'width' => 50, 'height' => 30, 'imageFormat' => null, 'link' => null ),
+      'name' => array ( 'type' => 'text', 'name' => '', 'align'=>'L', 'ln' => 1 ),
+      'nit' => array ( 'type' => 'text', 'name' => 'Nit', 'ln' => 1 ),
+      'city' => array ( 'type' => 'text', 'name' => 'Ciudad', 'ln' => 1 ),
+      'adress' => array ( 'type' => 'text', 'name' => 'Dirección', 'ln' => 1 ),
+      'phoneNumber' => array ( 'type' => 'text', 'name' => 'Teléfono' )
+    ];
+    $this->printHeader( $ipsDataArray, $ipsDictionary );
   }
 }
 
