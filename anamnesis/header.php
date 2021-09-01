@@ -10,6 +10,18 @@ class PDF extends FPDF {
 	  $this->Ln();
   }
 
+
+  private $defaultFamily = null;
+  private $defaultStyle = null;
+  private $defaultSize = null;
+
+  function SetFont( $family, $style = '', $size = 0 ) {
+    $this->defaultFamily = $family;
+
+    parent::SetFont( $family, $style, $size );
+  }
+
+
   /**
   *    printCell method:
   * Receives all the Cell parameters and make an utf8_decode to the text.
@@ -19,6 +31,10 @@ class PDF extends FPDF {
   *  font parameters = Family, Style and Size
   */
   function printCell( $width = 0, $height	= 0, $text = '', $border = 0, $ln = 0, $align = 'L', $fill = false, $link = null, $lnBefore = null, $fontFamily = null, $fontStyle = null, $fontSize = null ) {
+
+    if ( $fontFamily === null ) {
+      $fontFamily = ( ( $this->defaultFamily === null ) ? 'Arial' : $this->defaultFamily );
+    }
 
     $this->SetFont( $fontFamily, $fontStyle, $fontSize );
 
@@ -34,8 +50,6 @@ class PDF extends FPDF {
 
   function ipsData( $ipsDataArray ) {
     $ipsDictionary = [ 'name' => '', 'nit' => 'Nit', 'city' => 'Ciudad', 'adress' => 'Dirección', 'phoneNumber' => 'Teléfono' ];
-
-    $this->SetFont( 'Arial', '', 10 );
 
     $toPrint = '';
 
