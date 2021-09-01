@@ -26,25 +26,28 @@ class PDF extends FPDF {
   *    printCell method:
   * Receives all the Cell parameters and make an utf8_decode to the text.
   * http://www.fpdf.org/en/doc/cell.htm
-  * Additional parameters are:
-  *  $lnBefore = Receives a number (int or float) to specify the size of the line break before the text to print (if you send true the value equals the height of the last printed cell)
-  *  font parameters = Family, Style and Size
+  * Additional parameters are received in the $options array:
+  *  $options[ 'type' ] = Recieves a type (you can see and modify them on the printCellType method)
+  *  $options[ 'lnBefore' ] = Receives a number (int or float) to specify the size of the line break before the text to print (if you send true the value equals the height of the last printed cell)
+  *  Font parameters = $options[ 'fontFamily' ], $options[ 'fontStyle' ], $options[ 'fontSize' ]
   */
-  function printCell( $width = 0, $height	= 0, $text = '', $border = 0, $ln = 0, $align = 'L', $fill = false, $link = null, $lnBefore = null, $fontFamily = null, $fontStyle = null, $fontSize = null ) {
+  function printCell( $options = [ 'lnBefore' => null, 'fontFamily' => null, 'fontStyle' => null, 'fontSize' => null ],
+    $width = null, $height = null, $text = null, $border = null, $ln = null, $align = null, $fill = null, $link = null ) {
 
-    if ( $fontFamily === null ) {
-      $fontFamily = ( ( $this->defaultFamily === null ) ? 'Arial' : $this->defaultFamily );
+    $printCellParameters = get_defined_vars();
+    if ( $printCellParameters[ 'options' ][ 'fontFamily' ] === null ) {
+      $printCellParameters[ 'options' ][ 'fontFamily' ] = ( ( $this->defaultFamily === null ) ? 'Arial' : $this->defaultFamily );
     }
 
-    $this->SetFont( $fontFamily, $fontStyle, $fontSize );
+    $this->SetFont( $printCellParameters[ 'options' ][ 'fontFamily' ], $printCellParameters[ 'options' ][ 'fontStyle' ], $printCellParameters[ 'options' ][ 'fontSize' ] );
 
-    if ( is_numeric( $lnBefore ) || $lnBefore === true ) {
-      if ( $lnBefore === true ) { $lnBefore = null; }
-      $this->Ln( $lnBefore );
+    if ( is_numeric( $printCellParameters[ 'options' ][ 'lnBefore' ] ) || $printCellParameters[ 'options' ][ 'lnBefore' ] === true ) {
+      if ( $printCellParameters[ 'options' ][ 'lnBefore' ] === true ) { $printCellParameters[ 'options' ][ 'lnBefore' ] = null; }
+      $this->Ln( $printCellParameters[ 'options' ][ 'lnBefore' ] );
     }
 
     $textUtf8Decoded = utf8_decode( $text );
-    $this->Cell( $width, $height, $textUtf8Decoded, $border, $ln, $align, $fill, $link );
+    $this->Cell( $printCellParameters[ 'width' ], $printCellParameters[ 'height' ], $textUtf8Decoded, $printCellParameters[ 'border' ], $printCellParameters ['ln'], $printCellParameters['align'], $printCellParameters[ 'fill' ], $printCellParameters[ 'link' ] );
   }
 
 
@@ -73,8 +76,8 @@ class PDF extends FPDF {
         if ( trim ( $value[ 'name' ] ) !== '' ) {
           $toPrint = $value[ 'name' ] . ': ';
         }
-
-        $this->printCell( 0, 5, $toPrint . $dataArray[ $key ], $value[ 'border' ], $value[ 'ln' ], $value[ 'align' ], $value[ 'fill' ], $value[ 'link' ], $value[ 'lnBefore' ], $value[ 'fontFamily' ], $value[ 'fontStyle' ], $value[ 'fontSize' ] );
+        $options = array( 'lnBefore' => $value[ 'lnBefore' ], 'fontFamily' => $value[ 'fontFamily' ], 'fontStyle' => $value[ 'fontStyle' ], 'fontSize' => $value[ 'fontSize' ] );
+        $this->printCell( $options, 0, 5, $toPrint . $dataArray[ $key ], $value[ 'border' ], $value[ 'ln' ], $value[ 'align' ], $value[ 'fill' ], $value[ 'link' ] );
 
       } else {
         $this->Image( $dataArray[ 'logo' ], $value[ 'x' ], $value[ 'y' ], $value[ 'width' ], $value[ 'height' ] );
